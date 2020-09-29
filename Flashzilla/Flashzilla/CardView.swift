@@ -9,6 +9,7 @@ import SwiftUI
 
 struct CardView: View {
     @Environment(\.accessibilityDifferentiateWithoutColor) var differentiateWithoutColor
+    @Environment(\.accessibilityEnabled) var accessibilityEnabled
     @State private var isShowingAnswer = false
     @State private var offset = CGSize.zero
     
@@ -34,14 +35,21 @@ struct CardView: View {
                 .shadow(radius: 10)
             
             VStack {
-                Text(card.prompt)
-                    .font(.largeTitle)
-                    .foregroundColor(.black)
-                
-                if isShowingAnswer {
-                    Text(card.answer)
-                        .font(.title)
-                        .foregroundColor(.gray)
+                if accessibilityEnabled {
+                    Text(isShowingAnswer ? card.answer : card.prompt)
+                        .font(.largeTitle)
+                        .foregroundColor(.black)
+                } else {
+                    
+                    Text(card.prompt)
+                        .font(.largeTitle)
+                        .foregroundColor(.black)
+                    
+                    if isShowingAnswer {
+                        Text(card.answer)
+                            .font(.title)
+                            .foregroundColor(.gray)
+                    }
                 }
             }
             .padding(20)
@@ -51,6 +59,7 @@ struct CardView: View {
         .rotationEffect(.degrees((Double(offset.width / 5))))
         .offset(x: offset.width * 5, y: 0)
         .opacity(2 - Double(abs(offset.width / 50)))
+        .accessibility(addTraits: .isButton)
         .gesture(
             DragGesture()
                 .onChanged { gesture in
@@ -66,9 +75,10 @@ struct CardView: View {
                     }
                 }
         )
-        .onTapGesture(count: /*@START_MENU_TOKEN@*/1/*@END_MENU_TOKEN@*/, perform: {
+        .onTapGesture(count: 2, perform: {
             self.isShowingAnswer.toggle()
         })
+        .animation(.spring())
     }
 }
 
