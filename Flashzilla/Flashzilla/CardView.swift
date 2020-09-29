@@ -9,8 +9,10 @@ import SwiftUI
 
 struct CardView: View {
     @State private var isShowingAnswer = false
-    let card: Card
+    @State private var offset = CGSize.zero
     
+    let card: Card
+    var removal: (() -> Void)? = nil
     
     var body: some View {
         ZStack {
@@ -32,7 +34,28 @@ struct CardView: View {
             .padding(20)
             .multilineTextAlignment(.center)
         }
-        .frame(width: 250, height: 250)
+        .frame(width: 450, height: 250)
+        .rotationEffect(.degrees((Double(offset.width / 5))))
+        .offset(x: offset.width * 5, y: 0)
+        .opacity(2 - Double(abs(offset.width / 50)))
+        .gesture(
+            DragGesture()
+                .onChanged { gesture in
+                    self.offset = gesture.translation
+                }
+            
+                .onEnded { _ in
+                    if abs(self.offset.width) > 100 {
+                        // remove card
+                        self.removal?()
+                    } else {
+                        self.offset = .zero
+                    }
+                }
+        )
+        .onTapGesture(count: /*@START_MENU_TOKEN@*/1/*@END_MENU_TOKEN@*/, perform: {
+            self.isShowingAnswer.toggle()
+        })
     }
 }
 
